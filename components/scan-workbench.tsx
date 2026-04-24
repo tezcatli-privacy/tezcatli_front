@@ -171,6 +171,8 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
   const [depositAmount, setDepositAmount] = useState<string>("");
   const [depositMessage, setDepositMessage] = useState<string>("");
   const [depositError, setDepositError] = useState<string>("");
+  const [withdrawMessage, setWithdrawMessage] = useState<string>("");
+  const [withdrawError, setWithdrawError] = useState<string>("");
   const [migrationFlowState, setMigrationFlowState] = useState<MigrationFlowState>("idle");
   const [migrationFlowMessage, setMigrationFlowMessage] = useState<string>("");
   const [confidentialAccountAddress, setConfidentialAccountAddress] = useState<string>("");
@@ -203,6 +205,8 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
     lane: usdcLane,
     depositFromEoa,
     depositFromSmartAccount,
+    withdrawFromEoa,
+    withdrawFromSmartAccount,
     isPending: isDepositingToVault,
     error: hookDepositError,
   } = useConfidentialVaultDeposit(manifest, walletClient, publicClient);
@@ -645,9 +649,21 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
           ...current,
           USDC: current.USDC && current.USDC > amount ? current.USDC - amount : 0n,
         }));
-        setDepositMessage(
-          `Private yield deployment submitted from the confidential smart account. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
-        );
+        if (result.strategyDeployment?.attempted) {
+          if (result.strategyDeployment.succeeded) {
+            setDepositMessage(
+              `Vault deposit completed and capital was deployed to ${result.strategyDeployment.strategyName}. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+            );
+          } else {
+            setDepositMessage(
+              `Vault deposit completed, but the ${result.strategyDeployment.strategyName} deployment step did not execute. ${result.strategyDeployment.error ?? "The connected wallet is likely not an operator for the vault coordinator."}`,
+            );
+          }
+        } else {
+          setDepositMessage(
+            `Vault deposit completed from the confidential smart account. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+          );
+        }
         return;
       }
 
@@ -678,11 +694,104 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
         },
       });
 
-      setDepositMessage(
-        `Vault deposit submitted. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
-      );
+      if (result.strategyDeployment?.attempted) {
+        if (result.strategyDeployment.succeeded) {
+          setDepositMessage(
+            `Vault deposit completed and capital was deployed to ${result.strategyDeployment.strategyName}. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+          );
+        } else {
+          setDepositMessage(
+            `Vault deposit completed, but the ${result.strategyDeployment.strategyName} deployment step did not execute. ${result.strategyDeployment.error ?? "The connected wallet is likely not an operator for the vault coordinator."}`,
+          );
+        }
+      } else {
+        setDepositMessage(
+          `Vault deposit submitted. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+        );
+      }
     } catch (error) {
       setDepositError(formatWalletError(error, "Confidential vault deposit failed."));
+    }
+  };
+
+  const handleVaultWithdraw = async () => {
+    if (!wallet) return;
+
+    setWithdrawError("");
+    setWithdrawMessage("");
+
+    try {
+      if (confidentialAccountAddress) {
+        const executeSmartAccount = async ({
+          target,
+          data,
+          value = 0n,
+        }: {
+          target: Address;
+          data: Hex;
+          value?: bigint;
+        }) =>
+          walletClient!.writeContract({
+            address: confidentialAccountAddress as Address,
+            abi: smartAccount4337Abi,
+            functionName: "execute",
+            args: [target, value, data],
+            account: wallet as Address,
+            chain: arbitrumSepolia,
+            ...(await buildWriteFeeOverrides(publicClient)),
+          });
+
+        const result = await withdrawFromSmartAccount({
+          smartAccountAddress: confidentialAccountAddress as Address,
+          recipient: confidentialAccountAddress as Address,
+          executeSmartAccount,
+        });
+
+        setMigratedAssetBalances(current => ({
+          ...current,
+          USDC: 0n,
+        }));
+
+        if (result.strategyRedemption.attempted) {
+          if (result.strategyRedemption.succeeded) {
+            setWithdrawMessage(
+              `Vault withdrawal completed. ${result.strategyRedemption.sharesRedeemed && result.strategyRedemption.sharesRedeemed > 0n ? `Capital was redeemed from ${result.strategyRedemption.strategyName} first. ` : ""}Confidential USDC returned to the smart account. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+            );
+          } else {
+            setWithdrawMessage(
+              `The vault withdrawal path is ready, but redeeming from ${result.strategyRedemption.strategyName} did not execute. ${result.strategyRedemption.error ?? "The connected wallet is likely not an operator for the vault coordinator."}`,
+            );
+          }
+        } else {
+          setWithdrawMessage(
+            `Vault withdrawal completed. Confidential USDC returned to the smart account. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+          );
+        }
+        return;
+      }
+
+      const result = await withdrawFromEoa({
+        account: wallet as Address,
+        recipient: wallet as Address,
+      });
+
+      if (result.strategyRedemption.attempted) {
+        if (result.strategyRedemption.succeeded) {
+          setWithdrawMessage(
+            `Vault withdrawal completed. ${result.strategyRedemption.sharesRedeemed && result.strategyRedemption.sharesRedeemed > 0n ? `Capital was redeemed from ${result.strategyRedemption.strategyName} first. ` : ""}Confidential USDC returned to the connected wallet. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+          );
+        } else {
+          setWithdrawMessage(
+            `The vault withdrawal path is ready, but redeeming from ${result.strategyRedemption.strategyName} did not execute. ${result.strategyRedemption.error ?? "The connected wallet is likely not an operator for the vault coordinator."}`,
+          );
+        }
+      } else {
+        setWithdrawMessage(
+          `Vault withdrawal completed. Confidential USDC returned to the connected wallet. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
+        );
+      }
+    } catch (error) {
+      setWithdrawError(formatWalletError(error, "Confidential vault withdrawal failed."));
     }
   };
 
@@ -1394,7 +1503,7 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
 	                  <p className="eyebrow">Generate Private Yield</p>
 	                  <h3>Deploy capital without exposing the strategy</h3>
 	                  <p className="muted">
-	                    Shield public USDC into tzcUSDC and transfer it confidentially into the USDC vault.
+	                    Shield public USDC into tzcUSDC, route it into the USDC vault, and then deploy to the active yield strategy.
 	                  </p>
 	                  <div className="compact-address-list">
 	                    <p className="muted compact-meta">
@@ -1464,6 +1573,20 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
 	                    <p className="muted">Select funded USDC in Migration Selection to enable private yield.</p>
 	                  )}
 	                  {depositMessage ? <p className="wallet-pill small-pill">{depositMessage}</p> : null}
+	                  {withdrawMessage ? <p className="wallet-pill small-pill">{withdrawMessage}</p> : null}
+	                  {withdrawError ? <p className="error-text">{withdrawError}</p> : null}
+	                  <div className="hero-actions">
+	                    <button
+	                      className="ghost-button"
+	                      onClick={() => void handleVaultWithdraw()}
+	                      disabled={!wallet || !migrationFlowReady || isDepositingToVault}
+	                    >
+	                      {isDepositingToVault ? "Processing..." : "Withdraw Private Yield"}
+	                    </button>
+	                  </div>
+	                  <p className="muted">
+	                    This exits the full USDC strategy position back into the confidential smart account. In alpha, strategy redeem runs at vault level before the confidential withdrawal.
+	                  </p>
 	                </article>
 
 	                <article className="panel feature-card">

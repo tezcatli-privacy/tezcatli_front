@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Encryptable } from "@cofhe/sdk";
+import { Encryptable, FheTypes } from "@cofhe/sdk";
 import { arbSepolia as cofheArbSepolia } from "@cofhe/sdk/chains";
 import { createCofheClient, createCofheConfig } from "@cofhe/sdk/web";
 import {
@@ -95,6 +95,32 @@ const batchMigratorAbi = parseAbi([
 const smartAccount4337Abi = parseAbi([
   "function execute(address target, uint256 value, bytes data) returns (bytes result)",
 ]);
+const vaultPositionAbi = parseAbi([
+  "function principalDepositedOf(address account) view returns (uint256)",
+  "function grossPositionSnapshotOf(address account) view returns (uint256)",
+  "function netPositionSnapshotOf(address account) view returns (uint256)",
+  "function pendingYieldSnapshotOf(address account) view returns (uint256)",
+  "function pendingFeeSnapshotOf(address account) view returns (uint256)",
+  "function hasActivePosition(address account) view returns (bool)",
+  "function positionSnapshotUpdatedAt(address account) view returns (uint64)",
+  "function withdrawAvailableAt(address account) view returns (uint64)",
+  "function currentWithdrawalFeeBps(address account) view returns (uint16)",
+  "function refreshPositionSnapshot(address account)",
+]);
+
+type VaultPositionState = {
+  account: Address;
+  readable: boolean;
+  hasActivePosition: boolean;
+  principalRaw: bigint;
+  grossRaw: bigint;
+  netRaw: bigint;
+  pendingYieldRaw: bigint;
+  pendingFeeRaw: bigint;
+  withdrawAvailableAt: bigint;
+  feeBps: number;
+  snapshotUpdatedAt: bigint;
+};
 
 const stageTone = (status: "completed" | "partial" | "failed" | "skipped") => {
   switch (status) {
@@ -147,6 +173,11 @@ const formatBalancePreview = (value: string) => {
   return parsed.toFixed(6).replace(/\.?0+$/, "");
 };
 
+const formatDateTime = (unixSeconds?: bigint) => {
+  if (!unixSeconds || unixSeconds <= 0n) return "pending";
+  return new Date(Number(unixSeconds) * 1000).toLocaleString();
+};
+
 const GAS_RESERVE_WEI = parseUnits("0.003", 18);
 
 const buildMigrationSalt = (wallet: Address) => {
@@ -173,6 +204,9 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
   const [depositError, setDepositError] = useState<string>("");
   const [withdrawMessage, setWithdrawMessage] = useState<string>("");
   const [withdrawError, setWithdrawError] = useState<string>("");
+  const [vaultPosition, setVaultPosition] = useState<VaultPositionState | null>(null);
+  const [isRefreshingVaultPosition, setIsRefreshingVaultPosition] = useState(false);
+  const [vaultPositionError, setVaultPositionError] = useState<string>("");
   const [migrationFlowState, setMigrationFlowState] = useState<MigrationFlowState>("idle");
   const [migrationFlowMessage, setMigrationFlowMessage] = useState<string>("");
   const [confidentialAccountAddress, setConfidentialAccountAddress] = useState<string>("");
@@ -548,6 +582,15 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
   const migratedUsdcRawBalance = migratedAssetBalances.USDC ?? 0n;
   const migratedUsdcDisplayBalance =
     migratedUsdcRawBalance > 0n ? formatUnits(migratedUsdcRawBalance, 6) : "";
+  const vaultPrincipalDisplay = vaultPosition ? formatBalancePreview(formatUnits(vaultPosition.principalRaw, 6)) : "0";
+  const vaultGrossDisplay = vaultPosition ? formatBalancePreview(formatUnits(vaultPosition.grossRaw, 6)) : "0";
+  const vaultNetDisplay = vaultPosition ? formatBalancePreview(formatUnits(vaultPosition.netRaw, 6)) : "0";
+  const vaultYieldDisplay = vaultPosition ? formatBalancePreview(formatUnits(vaultPosition.pendingYieldRaw, 6)) : "0";
+  const vaultFeeDisplay = vaultPosition ? formatBalancePreview(formatUnits(vaultPosition.pendingFeeRaw, 6)) : "0";
+  const vaultPositionAccount = (confidentialAccountAddress || wallet || "") as Address;
+  const vaultPositionUsesSmartAccount =
+    Boolean(confidentialAccountAddress) &&
+    confidentialAccountAddress.toLowerCase() !== wallet.toLowerCase();
   const migrationFlowReady = migrationFlowState === "ready";
   const migrationPrimaryCta =
     migrationFlowState === "creating_account"
@@ -557,6 +600,169 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
         : migrationFlowReady
           ? "Confidential account ready"
           : "Create confidential account and migrate";
+
+  const refreshVaultPosition = async (refreshOnchain = false) => {
+    if (!walletClient || !cofheClient || !usdcLane?.asset.vault || !vaultPositionAccount) {
+      setVaultPosition(null);
+      return null;
+    }
+
+    setIsRefreshingVaultPosition(true);
+    setVaultPositionError("");
+
+    try {
+      if (refreshOnchain) {
+        await walletClient.writeContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "refreshPositionSnapshot",
+          args: [vaultPositionAccount],
+          account: wallet as Address,
+          chain: arbitrumSepolia,
+          ...(await buildWriteFeeOverrides(publicClient)),
+        });
+      }
+
+      const [hasActivePosition, snapshotUpdatedAt, withdrawAvailableAt, feeBps] = await Promise.all([
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "hasActivePosition",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "positionSnapshotUpdatedAt",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "withdrawAvailableAt",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "currentWithdrawalFeeBps",
+          args: [vaultPositionAccount],
+        }),
+      ]);
+
+      if (!hasActivePosition) {
+        const emptyPosition = {
+          account: vaultPositionAccount,
+          readable: !vaultPositionUsesSmartAccount,
+          hasActivePosition: false,
+          principalRaw: 0n,
+          grossRaw: 0n,
+          netRaw: 0n,
+          pendingYieldRaw: 0n,
+          pendingFeeRaw: 0n,
+          withdrawAvailableAt,
+          feeBps: Number(feeBps),
+          snapshotUpdatedAt,
+        } satisfies VaultPositionState;
+        setVaultPosition(emptyPosition);
+        return emptyPosition;
+      }
+
+      const permit = vaultPositionUsesSmartAccount
+        ? await cofheClient.permits.importShared(
+            await cofheClient.permits.createSharing({
+              issuer: vaultPositionAccount,
+              recipient: wallet as Address,
+              name: "Tezcatli Smart Account Vault Position",
+            }),
+          )
+        : await cofheClient.permits.getOrCreateSelfPermit(
+            publicClient,
+            walletClient,
+            arbitrumSepolia.id,
+            wallet as Address,
+          );
+
+      const [
+        principalHandle,
+        grossHandle,
+        netHandle,
+        pendingYieldHandle,
+        pendingFeeHandle,
+      ] = await Promise.all([
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "principalDepositedOf",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "grossPositionSnapshotOf",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "netPositionSnapshotOf",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "pendingYieldSnapshotOf",
+          args: [vaultPositionAccount],
+        }),
+        publicClient.readContract({
+          address: usdcLane.asset.vault as Address,
+          abi: vaultPositionAbi,
+          functionName: "pendingFeeSnapshotOf",
+          args: [vaultPositionAccount],
+        }),
+      ]);
+
+      const decryptHandle = async (handle: bigint) =>
+        BigInt(
+          await cofheClient
+            .decryptForView(handle, FheTypes.Uint64)
+            .setChainId(arbitrumSepolia.id)
+            .setAccount(wallet as Address)
+            .withPermit(permit)
+            .execute(),
+        );
+
+      const [principalRaw, grossRaw, netRaw, pendingYieldRaw, pendingFeeRaw] = await Promise.all([
+        decryptHandle(principalHandle),
+        decryptHandle(grossHandle),
+        decryptHandle(netHandle),
+        decryptHandle(pendingYieldHandle),
+        decryptHandle(pendingFeeHandle),
+      ]);
+
+      const nextPosition = {
+        account: vaultPositionAccount,
+        readable: true,
+        hasActivePosition: true,
+        principalRaw,
+        grossRaw,
+        netRaw,
+        pendingYieldRaw,
+        pendingFeeRaw,
+        withdrawAvailableAt,
+        feeBps: Number(feeBps),
+        snapshotUpdatedAt,
+      } satisfies VaultPositionState;
+      setVaultPosition(nextPosition);
+      return nextPosition;
+    } catch (error) {
+      const message = formatWalletError(error, "Unable to refresh the vault position.");
+      setVaultPositionError(message);
+      return null;
+    } finally {
+      setIsRefreshingVaultPosition(false);
+    }
+  };
 
   useEffect(() => {
     if (migrationFlowReady && migratedUsdcRawBalance > 0n) {
@@ -581,6 +787,15 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
       setDepositError(hookDepositError);
     }
   }, [hookDepositError]);
+
+  useEffect(() => {
+    if (!wallet || !cofheClient || !usdcLane?.asset.vault || !vaultPositionAccount) {
+      setVaultPosition(null);
+      return;
+    }
+
+    void refreshVaultPosition(false);
+  }, [cofheClient, usdcLane?.asset.vault, vaultPositionAccount, wallet]);
 
   const handleVaultDeposit = async () => {
     if (!wallet || !cofheClient) return;
@@ -649,6 +864,7 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
           ...current,
           USDC: current.USDC && current.USDC > amount ? current.USDC - amount : 0n,
         }));
+        await refreshVaultPosition(false);
         if (result.strategyDeployment?.attempted) {
           if (result.strategyDeployment.succeeded) {
             setDepositMessage(
@@ -709,6 +925,7 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
           `Vault deposit submitted. Last tx: ${result.txHashes[result.txHashes.length - 1]}`,
         );
       }
+      await refreshVaultPosition(false);
     } catch (error) {
       setDepositError(formatWalletError(error, "Confidential vault deposit failed."));
     }
@@ -749,8 +966,9 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
 
         setMigratedAssetBalances(current => ({
           ...current,
-          USDC: 0n,
+          USDC: current.USDC + (vaultPosition?.readable ? vaultPosition.netRaw : 0n),
         }));
+        await refreshVaultPosition(false);
 
         if (result.strategyRedemption.attempted) {
           if (result.strategyRedemption.succeeded) {
@@ -774,6 +992,7 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
         account: wallet as Address,
         recipient: wallet as Address,
       });
+      await refreshVaultPosition(false);
 
       if (result.strategyRedemption.attempted) {
         if (result.strategyRedemption.succeeded) {
@@ -1536,6 +1755,21 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
 	                        "pending"
 	                      )}
 	                    </p>
+	                    <p className="muted compact-meta">
+	                      Vault:{" "}
+	                      {usdcLane?.asset.vault ? (
+	                        <a
+	                          href={arbiscanAddressUrl(usdcLane.asset.vault)}
+	                          target="_blank"
+	                          rel="noreferrer"
+	                          className="address-link"
+	                        >
+	                          {formatAddress(usdcLane.asset.vault)}
+	                        </a>
+	                      ) : (
+	                        "pending"
+	                      )}
+	                    </p>
 	                  </div>
 	                  <div className="hero-actions">
 	                    <input
@@ -1566,16 +1800,66 @@ export function ScanWorkbench({ manifest }: { manifest: AlphaManifest | null }) 
 	                    </button>
 	                  </div>
 	                  {migratedUsdcRawBalance > 0n ? (
-	                    <p className="muted">Confidential USDC available: {formatBalancePreview(migratedUsdcDisplayBalance)}</p>
+	                    <p className="muted">Confidential USDC available to deposit: {formatBalancePreview(migratedUsdcDisplayBalance)}</p>
 	                  ) : selectedUsdc ? (
 	                    <p className="muted">Selected USDC balance: {selectedUsdc.balance}</p>
 	                  ) : (
 	                    <p className="muted">Select funded USDC in Migration Selection to enable private yield.</p>
 	                  )}
+	                  <div className="list-grid">
+	                    <article className="list-card">
+	                      <div className="list-card-header">
+	                        <strong>Position owner</strong>
+	                        <span>{vaultPositionUsesSmartAccount ? "smart account" : "connected wallet"}</span>
+	                      </div>
+	                      <p className="muted">
+	                        <a
+	                          href={arbiscanAddressUrl(vaultPositionAccount)}
+	                          target="_blank"
+	                          rel="noreferrer"
+	                          className="address-link"
+	                        >
+	                          {formatAddress(vaultPositionAccount)}
+	                        </a>
+	                      </p>
+	                      <p className="muted">Snapshot updated: {formatDateTime(vaultPosition?.snapshotUpdatedAt)}</p>
+	                      <p className="muted">Withdraw available: {formatDateTime(vaultPosition?.withdrawAvailableAt)}</p>
+	                    </article>
+	                    <article className="list-card">
+	                      <div className="list-card-header">
+	                        <strong>Vault position</strong>
+	                        <span>{vaultPosition?.hasActivePosition ? "active" : "idle"}</span>
+	                      </div>
+	                      {vaultPosition?.hasActivePosition && vaultPosition.readable ? (
+	                        <>
+	                          <p className="muted">Principal deposited: {vaultPrincipalDisplay} USDC</p>
+	                          <p className="muted">Estimated position value: {vaultGrossDisplay} USDC</p>
+	                          <p className="muted">Pending yield: {vaultYieldDisplay} USDC</p>
+	                          <p className="muted">Pending fee: {vaultFeeDisplay} USDC</p>
+	                          <p className="muted">Estimated withdrawal value: {vaultNetDisplay} USDC</p>
+	                        </>
+	                      ) : vaultPosition?.hasActivePosition ? (
+	                        <p className="muted">
+	                          The vault position is live onchain, but the browser could not decrypt the latest shared snapshot. Refresh the position to regenerate the smart-account reading permit.
+	                        </p>
+	                      ) : (
+	                        <p className="muted">No active confidential vault position detected yet.</p>
+	                      )}
+	                      <p className="muted">Current withdrawal fee: {((vaultPosition?.feeBps ?? 0) / 100).toFixed(2)}%</p>
+	                    </article>
+	                  </div>
 	                  {depositMessage ? <p className="wallet-pill small-pill">{depositMessage}</p> : null}
 	                  {withdrawMessage ? <p className="wallet-pill small-pill">{withdrawMessage}</p> : null}
+	                  {vaultPositionError ? <p className="error-text">{vaultPositionError}</p> : null}
 	                  {withdrawError ? <p className="error-text">{withdrawError}</p> : null}
 	                  <div className="hero-actions">
+	                    <button
+	                      className="ghost-button"
+	                      onClick={() => void refreshVaultPosition(true)}
+	                      disabled={!wallet || !usdcLane?.asset.vault || isRefreshingVaultPosition || isDepositingToVault}
+	                    >
+	                      {isRefreshingVaultPosition ? "Refreshing..." : "Refresh Vault Position"}
+	                    </button>
 	                    <button
 	                      className="ghost-button"
 	                      onClick={() => void handleVaultWithdraw()}

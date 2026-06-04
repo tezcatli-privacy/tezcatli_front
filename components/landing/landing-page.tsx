@@ -1,0 +1,414 @@
+import "@/app/landing.css";
+import Link from "next/link";
+import { EarlyAccessForm } from "@/components/early-access-form";
+import { ArchitectureNode } from "./architecture-node";
+import { BracketLink } from "./bracket-link";
+import { DotField } from "./dot-field";
+import { MetricBadge } from "./metric-badge";
+import { PrimaryCTA } from "./primary-cta";
+import { ProductCard } from "./product-card";
+import { SectionHeader } from "./section-header";
+import { SpotlightCard } from "./spotlight-card";
+import { WalletMockup } from "./wallet-mockup";
+
+const painPoints = [
+  { icon: "⚡", label: "Gas complexity", detail: "Gas fees" },
+  { icon: "◉", label: "Public exposure", detail: "Public balances" },
+  { icon: "!", label: "Wallet mistakes", detail: "Wrong networks" },
+];
+
+const benefitCards = [
+  {
+    icon: "◈",
+    eyebrow: "Protected by design",
+    title: "Your balance is not publicly exposed by default.",
+    copy: "Balance and activity stay private by default, so USDC does not expose your full financial life.",
+  },
+  {
+    icon: "↯",
+    eyebrow: "No gas. No friction.",
+    title: "Send and receive stablecoins without worrying about fees.",
+    copy: "z0tz handles execution behind the scenes — send and receive USDC without thinking about gas.",
+  },
+  {
+    icon: "◎",
+    eyebrow: "Full control, without the risk",
+    title: "No seed phrases. No confusing wallet setup.",
+    copy: "Sign in with passkeys instead of seed phrases or private keys.",
+  },
+];
+
+const useCases = [
+  { title: "Get paid", meta: "Receive stablecoins as usable income." },
+  { title: "Send money", meta: "Move value without gas or wallet friction." },
+  { title: "Store USD", meta: "Keep digital dollars with less public exposure." },
+];
+
+const steps = [
+  {
+    number: "1",
+    title: "Create your wallet in seconds",
+    copy: "No seed phrases. Just secure access.",
+    label: "Passkey setup",
+    preview: "✓ Passkey secured",
+  },
+  {
+    number: "2",
+    title: "Move your USDC",
+    copy: "Transfer from your existing wallet or exchange.",
+    label: "Deposit screen",
+    preview: "20 USDC received",
+  },
+  {
+    number: "3",
+    title: "Use it freely",
+    copy: "Send, receive, and manage your money without friction.",
+    label: "Send confirmation",
+    preview: "Gas sponsored",
+  },
+];
+
+const architectureNodes = [
+  { icon: "◎", title: "Passkey Wallet", copy: "Simple access for the user." },
+  {
+    icon: "⇄",
+    title: "Relayer",
+    copy: "Coordinates execution without exposing wallet complexity.",
+  },
+  {
+    icon: "◈",
+    title: "Private Flow",
+    copy: "Keeps transaction handling controlled and less exposed.",
+  },
+  {
+    icon: "☰",
+    title: "Safety Controls",
+    copy: "Operational controls for safer real-world flows.",
+  },
+];
+
+const safetyChecks = [
+  "Passkey-based access",
+  "Gasless execution",
+  "Reduced public exposure",
+  "Compliance-aware controls",
+  "Treasury-ready infrastructure",
+];
+
+const switchReasons = [
+  "I don't want to deal with gas anymore.",
+  "I don't want everything to be public.",
+  "I just want something that works.",
+];
+
+const recentActivity = [
+  { type: "Received", amount: "+250 USDC", meta: "Salary payout" },
+  { type: "Sent", amount: "-50 USDC", meta: "Family transfer" },
+  { type: "Status", amount: "Balance protected", meta: "Privacy layer active" },
+];
+
+const activityBadges = ["Gas sponsored", "Private activity", "Passkey secured"];
+
+export function LandingPage() {
+  return (
+    <div className="pds-landing">
+      <main className="pds-stack">
+        <nav className="pds-nav" aria-label="Primary">
+          <div className="pds-nav__brand">
+            <strong>Private Dollar OS</strong>
+            <span>z0tz · USDC account</span>
+          </div>
+          <div className="pds-nav__links">
+            <BracketLink href="#products">Products</BracketLink>
+            <BracketLink href="#how-it-works">How it works</BracketLink>
+            <BracketLink href="#early-access">Early access</BracketLink>
+            <BracketLink href="mailto:team@z0tz.com">Contact</BracketLink>
+          </div>
+        </nav>
+
+        <DotField className="pds-hero-wrap">
+          <section className="pds-hero">
+            <div className="pds-hero__copy">
+              <p className="pds-eyebrow pds-eyebrow--light">z0tz</p>
+              <h1>It&apos;s not a crypto wallet. It&apos;s a dollar account.</h1>
+              <p className="pds-hero-lede">
+                Use your USDC with the simplicity of a fintech app. No gas fees, no
+                seed phrases, no public history. Just dollars.
+              </p>
+              <div className="pds-hero__cta-block">
+                <div className="pds-hero__actions">
+                  <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+                  <Link className="pds-ghost-cta" href="#how-it-works">
+                    See how it works
+                  </Link>
+                </div>
+                <p className="pds-hero__note">
+                  Join the waitlist and get a $5 USDC trial balance.
+                </p>
+              </div>
+            </div>
+            <div className="pds-hero__stage">
+              <WalletMockup variant="hero" />
+            </div>
+          </section>
+        </DotField>
+
+        <section className="pds-section--light pds-problem-layout">
+          <div>
+            <SectionHeader
+              tone="light"
+              eyebrow="Problem"
+              title="USDC works. Wallet UX still gets in the way."
+              lede="Stablecoins are powerful, but today they still feel like crypto infrastructure."
+            />
+            <div className="pds-chip-row" style={{ marginTop: 18 }}>
+              <span>gas fees</span>
+              <span>public balances</span>
+              <span>seed phrases</span>
+              <span>wrong networks</span>
+            </div>
+            <p className="pds-meta" style={{ marginTop: 16, color: "rgba(7,17,13,0.62)" }}>
+              You should not need gas, networks, seed phrases, and public wallet graphs
+              just to use digital dollars. z0tz turns that into a simple account experience.
+            </p>
+          </div>
+          <div>
+            <div className="pds-pain-grid">
+              {painPoints.map(point => (
+                <SpotlightCard key={point.label} className="pds-compare-card">
+                  <span className="pds-icon-chip">{point.icon}</span>
+                  <h3>{point.label}</h3>
+                  <p>{point.detail}</p>
+                </SpotlightCard>
+              ))}
+            </div>
+            <div className="pds-compare-stack">
+              <div className="pds-compare-card">
+                <p className="pds-eyebrow">Traditional wallet</p>
+                <div className="pds-signal-row">
+                  <span>Gas required</span>
+                  <span>Seed phrase</span>
+                  <span>Public address</span>
+                  <span>Wrong network</span>
+                </div>
+              </div>
+              <div className="pds-compare-card pds-compare-card--z0tz">
+                <p className="pds-eyebrow">z0tz</p>
+                <div className="pds-signal-row">
+                  <span>Sponsored gas</span>
+                  <span>Passkey</span>
+                  <span>Less exposure</span>
+                  <span>Simple USDC</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="pds-section--light" id="products">
+          <div className="pds-products-header">
+            <SectionHeader
+              tone="light"
+              eyebrow="Product benefits"
+              title="A better way to hold and move your money"
+              lede="Three capabilities that turn USDC into everyday digital dollars."
+            />
+            <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+          </div>
+          <div className="pds-product-grid">
+            {benefitCards.map(card => (
+              <ProductCard key={card.title} {...card} />
+            ))}
+          </div>
+        </section>
+
+        <div className="pds-dark-band">
+          <section className="pds-dark-band__part">
+            <SectionHeader
+              eyebrow="Why people switch"
+              title="Reasons that sound human, not technical."
+            />
+            <div className="pds-quote-grid" style={{ marginTop: 22 }}>
+              {switchReasons.map(reason => (
+                <SpotlightCard key={reason} className="pds-quote-card">
+                  <p>{reason}</p>
+                </SpotlightCard>
+              ))}
+            </div>
+          </section>
+
+          <section className="pds-dark-band__part">
+            <SectionHeader
+              eyebrow="Built for real usage"
+              title="Designed for people who already use stablecoins in daily life."
+              lede="Get paid, send money, and store value in digital dollars — without wallet friction."
+            />
+            <div className="pds-usage-layout" style={{ marginTop: 24 }}>
+              <div className="pds-usage-list">
+                {useCases.map((item, index) => (
+                  <div
+                    key={item.title}
+                    className={`pds-usage-item${index === 0 ? " pds-usage-item--active" : ""}`}
+                  >
+                    <h3>{item.title}</h3>
+                    <p>{item.meta}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="pds-activity-panel">
+                <div className="pds-wallet-mockup__top">
+                  <p className="pds-eyebrow pds-eyebrow--light">Digital dollar balance</p>
+                  <span className="pds-status-pill">Protected</span>
+                </div>
+                <strong className="pds-activity-balance">1,320.00 USDC</strong>
+                <div className="pds-badge-row">
+                  {activityBadges.map(item => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+                {recentActivity.map(item => (
+                  <div key={`${item.type}-${item.amount}`} className="pds-activity-row">
+                    <div>
+                      <span>{item.type}</span>
+                      <p>{item.meta}</p>
+                    </div>
+                    <strong>{item.amount}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section className="pds-section--light" id="how-it-works">
+          <SectionHeader
+            tone="light"
+            eyebrow="How it works"
+            title="Three steps. Less anxiety."
+          />
+          <div className="pds-steps-grid" style={{ marginTop: 24 }}>
+            {steps.map(step => (
+              <article key={step.number} className="pds-step-card">
+                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                  <span className="pds-step-index">{step.number}</span>
+                  <p className="pds-eyebrow">{step.label}</p>
+                </div>
+                <h3>{step.title}</h3>
+                <p>{step.copy}</p>
+                <div className="pds-mini-ui">
+                  <span>{step.preview}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <DotField className="pds-trial-wrap" defaultX={40} defaultY={50}>
+          <section className="pds-section--dark pds-trial-layout">
+            <div>
+              <SectionHeader
+                eyebrow="Trial offer"
+                title="Try your first private, gasless transaction — on us"
+                lede="Deposit 20 USDC and get a 5 USDC trial balance. Available for the first 300 users."
+              />
+              <div style={{ marginTop: 20 }}>
+                <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+              </div>
+              <p className="pds-helper" style={{ marginTop: 14 }}>
+                Limited early access
+              </p>
+              <p className="pds-meta" style={{ marginTop: 8 }}>
+                First 300 eligible users only. Minimum initial deposit: 20 USDC. Anti-abuse
+                checks apply.
+              </p>
+            </div>
+            <div className="pds-trial-metrics">
+              <MetricBadge label="Trial balance" value="$5 USDC" />
+              <MetricBadge label="Cohort" value="First 300" tone="gold" />
+            </div>
+          </section>
+        </DotField>
+
+        <section className="pds-section--dark">
+          <SectionHeader
+            eyebrow="Architecture / Control layer"
+            title="Simple on the outside. Controlled underneath."
+            lede="z0tz hides wallet complexity while coordinating infrastructure for safer stablecoin flows."
+          />
+          <div className="pds-arch-grid" style={{ marginTop: 24 }}>
+            {architectureNodes.map((node, index) => (
+              <ArchitectureNode
+                key={node.title}
+                {...node}
+                showConnector={index < architectureNodes.length - 1}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="pds-section--light">
+          <SectionHeader
+            tone="light"
+            eyebrow="Designed for safer usage"
+            title="Safer stablecoin usage starts with fewer mistakes."
+            lede="Less wallet complexity, less public exposure, and less transaction friction."
+          />
+          <div className="pds-checklist" style={{ marginTop: 22 }}>
+            {safetyChecks.map(item => (
+              <div key={item} className="pds-check-row">
+                <span>✓</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="pds-section--light pds-early-access" id="early-access">
+          <div>
+            <SectionHeader
+              tone="light"
+              eyebrow="Early access"
+              title="Tell us how you use stablecoins today."
+              lede="Qualify for the waitlist so we can prioritize users with real stablecoin usage and mainnet intent."
+            />
+            <div className="pds-lead-tags" style={{ marginTop: 16 }}>
+              <span>Current stablecoin usage</span>
+              <span>Exchange or wallet used today</span>
+              <span>Initial mainnet amount</span>
+              <span>Waitlist intent</span>
+            </div>
+          </div>
+          <EarlyAccessForm />
+        </section>
+
+        <DotField className="pds-final-wrap" defaultX={35} defaultY={40}>
+          <section className="pds-final">
+            <div className="pds-final__copy">
+              <SectionHeader
+                eyebrow="This is where your stablecoins live"
+                title="Not just a wallet. A better way to hold and use digital dollars."
+                lede="Get early access and qualify for the $5 USDC trial balance."
+              />
+              <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+            </div>
+            <WalletMockup variant="final" showFlowline={false} />
+          </section>
+        </DotField>
+
+        <footer className="pds-footer">
+          <div>
+            <strong>z0tz</strong>
+            <p>Private Dollar OS — digital dollars with less friction and less exposure.</p>
+          </div>
+          <div className="pds-footer__links">
+            <BracketLink href="https://x.com/0xoucan" external>
+              Twitter
+            </BracketLink>
+            <BracketLink href="#early-access">Early access</BracketLink>
+            <BracketLink href="mailto:team@z0tz.com">Contact</BracketLink>
+          </div>
+        </footer>
+      </main>
+    </div>
+  );
+}

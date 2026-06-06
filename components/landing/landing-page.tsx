@@ -121,7 +121,7 @@ export function LandingPage() {
           <div className="pds-nav__links">
             <BracketLink href="#products">Products</BracketLink>
             <BracketLink href="#how-it-works">How it works</BracketLink>
-            <BracketLink href="#early-access">Early access</BracketLink>
+            <BracketLink href="#early-access">Guided demo</BracketLink>
             <BracketLink href="mailto:team@z0tz.com">Contact</BracketLink>
           </div>
         </nav>
@@ -133,17 +133,18 @@ export function LandingPage() {
               <h1>It&apos;s not a crypto wallet. It&apos;s a dollar account.</h1>
               <p className="pds-hero-lede">
                 Use your USDC with the simplicity of a fintech app. No gas fees, no
-                seed phrases, no public history. Just dollars.
+                seed phrases, less public exposure. Just dollars.
               </p>
               <div className="pds-hero__cta-block">
                 <div className="pds-hero__actions">
-                  <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+                  <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
                   <Link className="pds-ghost-cta" href="#how-it-works">
                     See how it works
                   </Link>
                 </div>
                 <p className="pds-hero__note">
-                  Join the waitlist and get a $5 USDC trial balance.
+                  15 minute guided desktop demo · testnet only. No install required
+                  before the call.
                 </p>
               </div>
             </div>
@@ -213,7 +214,7 @@ export function LandingPage() {
               title="A better way to hold and move your money"
               lede="Three capabilities that turn USDC into everyday digital dollars."
             />
-            <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+            <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
           </div>
           <div className="pds-product-grid">
             {benefitCards.map(card => (
@@ -307,24 +308,24 @@ export function LandingPage() {
           <section className="pds-section--dark pds-trial-layout">
             <div>
               <SectionHeader
-                eyebrow="Trial offer"
-                title="Try your first private, gasless transaction — on us"
-                lede="Deposit 20 USDC and get a 5 USDC trial balance. Available for the first 300 users."
+                eyebrow="Validation cohort"
+                title="Join the first B2C validation cohort."
+                lede="We are running 15 minute guided desktop demos with early users before mainnet. The goal is to validate onboarding, stablecoin usage, privacy needs, and deposit intent before asking anyone to install."
               />
               <div style={{ marginTop: 20 }}>
-                <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+                <PrimaryCTA href="#early-access">Request guided demo</PrimaryCTA>
               </div>
               <p className="pds-helper" style={{ marginTop: 14 }}>
-                Limited early access
+                Limited early access cohort
               </p>
               <p className="pds-meta" style={{ marginTop: 8 }}>
-                First 300 eligible users only. Minimum initial deposit: 20 USDC. Anti-abuse
-                checks apply.
+                Guided demo first. Desktop install only for high-intent testers after
+                the call.
               </p>
             </div>
             <div className="pds-trial-metrics">
-              <MetricBadge label="Trial balance" value="$5 USDC" />
-              <MetricBadge label="Cohort" value="First 300" tone="gold" />
+              <MetricBadge label="Demo length" value="15 min" />
+              <MetricBadge label="Stage" value="Testnet only" tone="gold" />
             </div>
           </section>
         </DotField>
@@ -367,15 +368,15 @@ export function LandingPage() {
           <div>
             <SectionHeader
               tone="light"
-              eyebrow="Early access"
+              eyebrow="Request a guided demo"
               title="Tell us how you use stablecoins today."
-              lede="Qualify for the waitlist so we can prioritize users with real stablecoin usage and mainnet intent."
+              lede="So we can prioritize users with real stablecoin usage and mainnet intent."
             />
             <div className="pds-lead-tags" style={{ marginTop: 16 }}>
               <span>Current stablecoin usage</span>
               <span>Exchange or wallet used today</span>
               <span>Initial mainnet amount</span>
-              <span>Waitlist intent</span>
+              <span>Guided demo intent</span>
             </div>
           </div>
           <EarlyAccessForm />
@@ -387,9 +388,9 @@ export function LandingPage() {
               <SectionHeader
                 eyebrow="This is where your stablecoins live"
                 title="Not just a wallet. A better way to hold and use digital dollars."
-                lede="Get early access and qualify for the $5 USDC trial balance."
+                lede="Join the first B2C validation cohort and help us validate the desktop flow before mainnet."
               />
-              <PrimaryCTA href="#early-access">Get early access</PrimaryCTA>
+              <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
             </div>
             <WalletMockup variant="final" showFlowline={false} />
           </section>
@@ -401,10 +402,10 @@ export function LandingPage() {
             <p>Private Dollar OS — digital dollars with less friction and less exposure.</p>
           </div>
           <div className="pds-footer__links">
-            <BracketLink href="https://x.com/0xoucan" external>
+            <BracketLink href="https://x.com/0xz0tz" external>
               Twitter
             </BracketLink>
-            <BracketLink href="#early-access">Early access</BracketLink>
+            <BracketLink href="#early-access">Guided demo</BracketLink>
             <BracketLink href="mailto:team@z0tz.com">Contact</BracketLink>
           </div>
         </footer>

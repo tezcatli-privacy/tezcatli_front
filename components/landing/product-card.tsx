@@ -16,7 +16,7 @@ export function ProductCard({
   title,
   copy,
   ctaHref = "#early-access",
-  ctaLabel = "Get early access",
+  ctaLabel = "Book a 15 min demo",
 }: ProductCardProps) {
   return (
     <SpotlightCard className="pds-product-card">

@@ -191,7 +191,7 @@ export function EarlyAccessForm() {
         </div>
       </fieldset>
       <button className="primary-button prominent-button" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Sending..." : "Request demo"}
+        {isSubmitting ? "Sending..." : "Request guided demo"}
       </button>
       <p className="compact-meta">
         Testnet only for now. You do not need to install anything before the demo.

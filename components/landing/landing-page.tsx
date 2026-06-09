@@ -9,6 +9,7 @@ import { PrimaryCTA } from "./primary-cta";
 import { ProductCard } from "./product-card";
 import { SectionHeader } from "./section-header";
 import { SpotlightCard } from "./spotlight-card";
+import { UsageSwitcher } from "./usage-switcher";
 import { WalletMockup } from "./wallet-mockup";
 
 const painPoints = [
@@ -22,13 +23,13 @@ const benefitCards = [
     icon: "◈",
     eyebrow: "Protected by design",
     title: "Your balance is not publicly exposed by default.",
-    copy: "Balance and activity stay private by default, so USDC does not expose your full financial life.",
+    copy: "Balance and activity stay private by default, so stablecoins do not expose your full financial life.",
   },
   {
     icon: "↯",
     eyebrow: "No gas. No friction.",
     title: "Send and receive stablecoins without worrying about fees.",
-    copy: "z0tz handles execution behind the scenes — send and receive USDC without thinking about gas.",
+    copy: "z0tz handles execution behind the scenes — send and receive supported stablecoins without thinking about gas.",
   },
   {
     icon: "◎",
@@ -36,12 +37,6 @@ const benefitCards = [
     title: "No seed phrases. No confusing wallet setup.",
     copy: "Sign in with passkeys instead of seed phrases or private keys.",
   },
-];
-
-const useCases = [
-  { title: "Get paid", meta: "Receive stablecoins as usable income." },
-  { title: "Send money", meta: "Move value without gas or wallet friction." },
-  { title: "Store USD", meta: "Keep digital dollars with less public exposure." },
 ];
 
 const steps = [
@@ -54,10 +49,10 @@ const steps = [
   },
   {
     number: "2",
-    title: "Move your USDC",
+    title: "Move your stablecoins",
     copy: "Transfer from your existing wallet or exchange.",
     label: "Deposit screen",
-    preview: "20 USDC received",
+    preview: "20 USD received",
   },
   {
     number: "3",
@@ -101,13 +96,38 @@ const switchReasons = [
   "I just want something that works.",
 ];
 
-const recentActivity = [
-  { type: "Received", amount: "+250 USDC", meta: "Salary payout" },
-  { type: "Sent", amount: "-50 USDC", meta: "Family transfer" },
-  { type: "Status", amount: "Balance protected", meta: "Privacy layer active" },
+const b2bCapabilities = [
+  {
+    title: "Passkey wallet UX",
+    copy: "Give users a familiar account experience without seed phrase onboarding.",
+  },
+  {
+    title: "Relayed stablecoin execution",
+    copy: "Sponsor or abstract gas so stablecoin actions feel like product flows, not crypto ops.",
+  },
+  {
+    title: "Reduced public exposure",
+    copy: "Design payment and balance flows that avoid unnecessary public wallet leakage.",
+  },
+  {
+    title: "Compliance-aware controls",
+    copy: "Add policy checks at integration boundaries without taking custody of user funds.",
+  },
 ];
 
-const activityBadges = ["Gas sponsored", "Private activity", "Passkey secured"];
+const trustBuildItems = [
+  "Passkey wallet access",
+  "Sponsored execution",
+  "Reduced public exposure",
+  "Compliance-aware checks",
+];
+
+const trustLimits = [
+  "Zero on-chain footprint",
+  "Full metadata anonymity",
+  "Privacy magic",
+  "Custody of user funds",
+];
 
 export function LandingPage() {
   return (
@@ -116,7 +136,7 @@ export function LandingPage() {
         <nav className="pds-nav" aria-label="Primary">
           <div className="pds-nav__brand">
             <strong>Private Dollar OS</strong>
-            <span>z0tz · USDC account</span>
+            <span>z0tz · stablecoin account</span>
           </div>
           <div className="pds-nav__links">
             <BracketLink href="#products">Products</BracketLink>
@@ -130,10 +150,11 @@ export function LandingPage() {
           <section className="pds-hero">
             <div className="pds-hero__copy">
               <p className="pds-eyebrow pds-eyebrow--light">z0tz</p>
-              <h1>It&apos;s not a crypto wallet. It&apos;s a dollar account.</h1>
+              <h1>Your private stablecoin account.</h1>
               <p className="pds-hero-lede">
-                Use your USDC with the simplicity of a fintech app. No gas fees, no
-                seed phrases, less public exposure. Just dollars.
+                Hold and move digital dollars with less wallet friction: passkey
+                access, sponsored execution, and reduced public exposure. z0tz starts
+                with USDC and is designed to support more stablecoins over time.
               </p>
               <div className="pds-hero__cta-block">
                 <div className="pds-hero__actions">
@@ -159,7 +180,7 @@ export function LandingPage() {
             <SectionHeader
               tone="light"
               eyebrow="Problem"
-              title="USDC works. Wallet UX still gets in the way."
+              title="Stablecoins work. Wallet UX still gets in the way."
               lede="Stablecoins are powerful, but today they still feel like crypto infrastructure."
             />
             <div className="pds-chip-row" style={{ marginTop: 18 }}>
@@ -170,7 +191,8 @@ export function LandingPage() {
             </div>
             <p className="pds-meta" style={{ marginTop: 16, color: "rgba(7,17,13,0.62)" }}>
               You should not need gas, networks, seed phrases, and public wallet graphs
-              just to use digital dollars. z0tz turns that into a simple account experience.
+              just to use digital dollars. z0tz turns that into a private stablecoin
+              account experience.
             </p>
           </div>
           <div>
@@ -199,7 +221,7 @@ export function LandingPage() {
                   <span>Sponsored gas</span>
                   <span>Passkey</span>
                   <span>Less exposure</span>
-                  <span>Simple USDC</span>
+                  <span>Stablecoin account</span>
                 </div>
               </div>
             </div>
@@ -212,7 +234,7 @@ export function LandingPage() {
               tone="light"
               eyebrow="Product benefits"
               title="A better way to hold and move your money"
-              lede="Three capabilities that turn USDC into everyday digital dollars."
+              lede="Three capabilities that turn stablecoins into everyday digital dollars."
             />
             <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
           </div>
@@ -244,40 +266,7 @@ export function LandingPage() {
               title="Designed for people who already use stablecoins in daily life."
               lede="Get paid, send money, and store value in digital dollars — without wallet friction."
             />
-            <div className="pds-usage-layout" style={{ marginTop: 24 }}>
-              <div className="pds-usage-list">
-                {useCases.map((item, index) => (
-                  <div
-                    key={item.title}
-                    className={`pds-usage-item${index === 0 ? " pds-usage-item--active" : ""}`}
-                  >
-                    <h3>{item.title}</h3>
-                    <p>{item.meta}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="pds-activity-panel">
-                <div className="pds-wallet-mockup__top">
-                  <p className="pds-eyebrow pds-eyebrow--light">Digital dollar balance</p>
-                  <span className="pds-status-pill">Protected</span>
-                </div>
-                <strong className="pds-activity-balance">1,320.00 USDC</strong>
-                <div className="pds-badge-row">
-                  {activityBadges.map(item => (
-                    <span key={item}>{item}</span>
-                  ))}
-                </div>
-                {recentActivity.map(item => (
-                  <div key={`${item.type}-${item.amount}`} className="pds-activity-row">
-                    <div>
-                      <span>{item.type}</span>
-                      <p>{item.meta}</p>
-                    </div>
-                    <strong>{item.amount}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <UsageSwitcher />
           </section>
         </div>
 
@@ -347,6 +336,43 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section className="pds-section--light pds-trust-section">
+          <SectionHeader
+            tone="light"
+            eyebrow="Trust & transparency"
+            title="What z0tz protects, and what it does not claim"
+            lede="Financial privacy should be clear, not magical. z0tz is designed to reduce unnecessary public exposure while being honest about what remains visible onchain."
+          />
+          <div className="pds-trust-grid">
+            <div className="pds-trust-card pds-trust-card--positive">
+              <h3>What we are building</h3>
+              <div className="pds-trust-list">
+                {trustBuildItems.map(item => (
+                  <div key={item} className="pds-trust-row">
+                    <span>✓</span>
+                    <p>{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="pds-trust-card">
+              <h3>What we do not claim</h3>
+              <div className="pds-trust-list">
+                {trustLimits.map(item => (
+                  <div key={item} className="pds-trust-row pds-trust-row--limit">
+                    <span>×</span>
+                    <p>{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="pds-trust-note">
+            Being clear about what is public and private is what makes the rest
+            trustworthy.
+          </p>
+        </section>
+
         <section className="pds-section--light">
           <SectionHeader
             tone="light"
@@ -396,10 +422,41 @@ export function LandingPage() {
           </section>
         </DotField>
 
+        <section className="pds-section--light pds-b2b-section">
+          <div className="pds-b2b-section__copy">
+            <SectionHeader
+              tone="light"
+              eyebrow="For apps and fintech teams"
+              title="Offer private, gas-sponsored stablecoin flows without building wallet infrastructure from scratch."
+              lede="z0tz is also being designed as infrastructure for products that want better stablecoin UX: passkey onboarding, relayed execution, reduced public exposure, and compliance-aware controls."
+            />
+            <div className="pds-b2b-actions">
+              <PrimaryCTA href="mailto:team@z0tz.com?subject=z0tz%20B2B%20integration">
+                Talk to us
+              </PrimaryCTA>
+              <p className="pds-meta">
+                B2B conversations are separate from the B2C validation cohort.
+              </p>
+            </div>
+          </div>
+          <div className="pds-b2b-grid">
+            {b2bCapabilities.map(item => (
+              <div key={item.title} className="pds-b2b-card">
+                <h3>{item.title}</h3>
+                <p>{item.copy}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <footer className="pds-footer">
           <div>
             <strong>z0tz</strong>
             <p>Private Dollar OS — digital dollars with less friction and less exposure.</p>
+            <p className="pds-footer__disclaimer">
+              Testnet proof of concept. Not yet deployed to mainnet. Do not use with
+              real funds.
+            </p>
           </div>
           <div className="pds-footer__links">
             <BracketLink href="https://x.com/0xz0tz" external>

@@ -8,14 +8,14 @@ type WalletMockupProps = {
 };
 
 const defaultActivities: WalletActivity[] = [
-  { label: "Received", value: "+50 USDC" },
+  { label: "Received", value: "+50 USD" },
   { label: "Sent", value: "Private transfer" },
   { label: "Fees", value: "Gas sponsored" },
 ];
 
 export function WalletMockup({
   variant = "hero",
-  balance = "125.00 USDC",
+  balance = "125.00 USD",
   activities = defaultActivities,
   showFlowline = true,
 }: WalletMockupProps) {

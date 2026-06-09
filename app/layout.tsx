@@ -5,10 +5,10 @@ import { securityAuditMetadata } from "@/lib/security-audit-meta";
 const baseMetadata: Metadata = {
   title: "z0tz Early Access",
   description:
-    "A simple testnet wallet for stablecoin users in LATAM who want less gas friction, fewer seed phrase risks, and less public exposure.",
+    "A private stablecoin account for users in LATAM who want less wallet friction, sponsored execution, and reduced public exposure.",
   keywords: [
     "z0tz",
-    "USDC wallet",
+    "stablecoin account",
     "stablecoin wallet",
     "LATAM stablecoins",
     "gasless wallet",
@@ -18,7 +18,7 @@ const baseMetadata: Metadata = {
   openGraph: {
     title: "z0tz Early Access",
     description:
-      "A simpler dollar wallet for people who already use stablecoins. Testnet demos now open.",
+      "A private stablecoin account for people who already use digital dollars. Guided testnet demos now open.",
     type: "website",
   },
 };

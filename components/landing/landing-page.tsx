@@ -29,7 +29,7 @@ const benefitCards = [
     icon: "↯",
     eyebrow: "No gas. No friction.",
     title: "Send and receive stablecoins without worrying about fees.",
-    copy: "z0tz handles execution behind the scenes — send and receive supported stablecoins without thinking about gas.",
+    copy: "z0tz handles execution behind the scenes, so you can send and receive supported stablecoins without thinking about gas.",
   },
   {
     icon: "◎",
@@ -264,7 +264,7 @@ export function LandingPage() {
             <SectionHeader
               eyebrow="Built for real usage"
               title="Designed for people who already use stablecoins in daily life."
-              lede="Get paid, send money, and store value in digital dollars — without wallet friction."
+              lede="Get paid, send money, and store value in digital dollars, without wallet friction."
             />
             <UsageSwitcher />
           </section>
@@ -452,7 +452,7 @@ export function LandingPage() {
         <footer className="pds-footer">
           <div>
             <strong>z0tz</strong>
-            <p>Private Dollar OS — digital dollars with less friction and less exposure.</p>
+            <p>Private Dollar OS, digital dollars with less friction and less exposure.</p>
             <p className="pds-footer__disclaimer">
               Testnet proof of concept. Not yet deployed to mainnet. Do not use with
               real funds.

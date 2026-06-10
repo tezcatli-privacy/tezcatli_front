@@ -150,15 +150,17 @@ export function LandingPage() {
           <section className="pds-hero">
             <div className="pds-hero__copy">
               <p className="pds-eyebrow pds-eyebrow--light">z0tz</p>
-              <h1>Your private stablecoin account.</h1>
+              <h1>A private stablecoin account for people who already use digital dollars.</h1>
               <p className="pds-hero-lede">
-                Hold and move digital dollars with less wallet friction: passkey
-                access, sponsored execution, and reduced public exposure. z0tz starts
-                with USDC and is designed to support more stablecoins over time.
+                Hold and move stablecoins with less wallet friction: passkey access,
+                sponsored execution, and reduced public exposure. z0tz starts with
+                USDC and is designed to support more stablecoins over time.
               </p>
               <div className="pds-hero__cta-block">
                 <div className="pds-hero__actions">
-                  <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
+                  <PrimaryCTA href="#early-access" eventSection="hero">
+                    Book a 15 min demo
+                  </PrimaryCTA>
                   <Link className="pds-ghost-cta" href="#how-it-works">
                     See how it works
                   </Link>
@@ -236,7 +238,9 @@ export function LandingPage() {
               title="A better way to hold and move your money"
               lede="Three capabilities that turn stablecoins into everyday digital dollars."
             />
-            <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
+            <PrimaryCTA href="#early-access" eventSection="product-benefits">
+              Book a 15 min demo
+            </PrimaryCTA>
           </div>
           <div className="pds-product-grid">
             {benefitCards.map(card => (
@@ -302,7 +306,9 @@ export function LandingPage() {
                 lede="We are running 15 minute guided desktop demos with early users before mainnet. The goal is to validate onboarding, stablecoin usage, privacy needs, and deposit intent before asking anyone to install."
               />
               <div style={{ marginTop: 20 }}>
-                <PrimaryCTA href="#early-access">Request guided demo</PrimaryCTA>
+                <PrimaryCTA href="#early-access" eventSection="validation-cohort">
+                  Request guided demo
+                </PrimaryCTA>
               </div>
               <p className="pds-helper" style={{ marginTop: 14 }}>
                 Limited early access cohort
@@ -416,7 +422,9 @@ export function LandingPage() {
                 title="Not just a wallet. A better way to hold and use digital dollars."
                 lede="Join the first B2C validation cohort and help us validate the desktop flow before mainnet."
               />
-              <PrimaryCTA href="#early-access">Book a 15 min demo</PrimaryCTA>
+              <PrimaryCTA href="#early-access" eventSection="final-cta">
+                Book a 15 min demo
+              </PrimaryCTA>
             </div>
             <WalletMockup variant="final" showFlowline={false} />
           </section>
@@ -431,7 +439,10 @@ export function LandingPage() {
               lede="z0tz is also being designed as infrastructure for products that want better stablecoin UX: passkey onboarding, relayed execution, reduced public exposure, and compliance-aware controls."
             />
             <div className="pds-b2b-actions">
-              <PrimaryCTA href="mailto:team@z0tz.com?subject=z0tz%20B2B%20integration">
+              <PrimaryCTA
+                href="mailto:team@z0tz.com?subject=z0tz%20B2B%20integration"
+                eventSection="b2b"
+              >
                 Talk to us
               </PrimaryCTA>
               <p className="pds-meta">

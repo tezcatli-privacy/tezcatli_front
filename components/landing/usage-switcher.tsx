@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import posthog from "posthog-js";
 
 const usageScenarios = [
   {
@@ -55,7 +56,12 @@ export function UsageSwitcher() {
             type="button"
             className={`pds-usage-item${index === activeIndex ? " pds-usage-item--active" : ""}`}
             aria-pressed={index === activeIndex}
-            onClick={() => setActiveIndex(index)}
+            onClick={() => {
+              setActiveIndex(index);
+              posthog.capture("usage_switcher_click", {
+                scenario: item.title,
+              });
+            }}
           >
             <h3>{item.title}</h3>
             <p>{item.meta}</p>

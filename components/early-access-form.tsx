@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import posthog from "posthog-js";
 
 const stablecoinUses = [
   "Saving in digital dollars",
@@ -11,7 +12,12 @@ const stablecoinUses = [
 ];
 
 const tools = ["Bitso", "Binance", "OKX", "TruBit", "Wallet", "Other"];
-const initialAmounts = ["Less than 20 USDC", "20-100 USDC", "100-500 USDC", "1K+ USDC"];
+const initialAmounts = [
+  "Less than 20 USD equivalent",
+  "20-100 USD equivalent",
+  "100-500 USD equivalent",
+  "1K+ USD equivalent",
+];
 
 type FormFields = {
   name: string;
@@ -44,6 +50,8 @@ function trackConversion(eventName: string, payload: Record<string, string>) {
   if (Array.isArray(dataLayer)) {
     dataLayer.push({ event: eventName, ...payload });
   }
+
+  posthog.capture(eventName, payload);
 }
 
 export function EarlyAccessForm() {
@@ -60,7 +68,7 @@ export function EarlyAccessForm() {
     event.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
-    trackConversion("early_access_submit", fields);
+    trackConversion("lead_form_submit_attempt", fields);
 
     try {
       const response = await fetch("/api/early-access", {
@@ -73,19 +81,25 @@ export function EarlyAccessForm() {
         setSubmitted(true);
         setSubmitStatus("saved");
         setFields(initialFields);
-        trackConversion("early_access_saved", fields);
+        trackConversion("lead_form_submit_success", fields);
         return;
       }
 
       if (response.status === 503) {
         setSubmitStatus("fallback");
+        trackConversion("lead_form_submit_fallback", fields);
         openEmailFallback(fields);
         return;
       }
 
       setSubmitStatus("error");
+      trackConversion("lead_form_submit_error", {
+        ...fields,
+        status: String(response.status),
+      });
     } catch {
       setSubmitStatus("fallback");
+      trackConversion("lead_form_submit_fallback", fields);
       openEmailFallback(fields);
     } finally {
       setIsSubmitting(false);
@@ -103,7 +117,7 @@ export function EarlyAccessForm() {
             required
             value={fields.name}
             onChange={event => updateField("name", event.target.value)}
-            onFocus={() => trackConversion("early_access_field_focus", { field: "name" })}
+            onFocus={() => trackConversion("lead_form_start", { field: "name" })}
           />
         </label>
         <label>
@@ -114,7 +128,7 @@ export function EarlyAccessForm() {
             required
             value={fields.contact}
             onChange={event => updateField("contact", event.target.value)}
-            onFocus={() => trackConversion("early_access_field_focus", { field: "contact" })}
+            onFocus={() => trackConversion("lead_form_start", { field: "contact" })}
           />
         </label>
         <label>
@@ -125,7 +139,7 @@ export function EarlyAccessForm() {
             required
             value={fields.country}
             onChange={event => updateField("country", event.target.value)}
-            onFocus={() => trackConversion("early_access_field_focus", { field: "country" })}
+            onFocus={() => trackConversion("lead_form_start", { field: "country" })}
           />
         </label>
         <label>

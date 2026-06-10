@@ -714,8 +714,13 @@ ul {
   gap: 14px;
 }
 
+.form-grid--primary label:first-child {
+  grid-column: 1 / -1;
+}
+
 .early-access-form label,
-.early-access-form fieldset {
+.early-access-form fieldset,
+.qualification-fields {
   display: grid;
   gap: 8px;
   min-width: 0;
@@ -748,6 +753,24 @@ ul {
   padding: 14px;
   border: 1px solid rgba(201, 212, 203, 0.88);
   border-radius: 14px;
+}
+
+.qualification-fields {
+  padding: 12px 14px;
+  border: 1px solid rgba(201, 212, 203, 0.78);
+  border-radius: 14px;
+  background: rgba(232, 243, 236, 0.34);
+}
+
+.qualification-fields summary {
+  cursor: pointer;
+  color: rgba(7, 61, 50, 0.74);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.qualification-fields[open] {
+  gap: 14px;
 }
 
 .early-access-form legend {

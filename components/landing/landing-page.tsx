@@ -115,6 +115,21 @@ const b2bCapabilities = [
   },
 ];
 
+const validationSignals = [
+  {
+    label: "Guided first",
+    value: "Demo before install",
+  },
+  {
+    label: "User focus",
+    value: "Stablecoin users first",
+  },
+  {
+    label: "Risk boundary",
+    value: "No real funds on testnet",
+  },
+];
+
 const trustBuildItems = [
   "Passkey wallet access",
   "Sponsored execution",
@@ -321,6 +336,15 @@ export function LandingPage() {
             <div className="pds-trial-metrics">
               <MetricBadge label="Demo length" value="15 min" />
               <MetricBadge label="Stage" value="Testnet only" tone="gold" />
+              <div className="pds-validation-proof">
+                <p className="pds-eyebrow pds-eyebrow--light">Current validation focus</p>
+                {validationSignals.map(item => (
+                  <div key={item.label} className="pds-validation-proof__row">
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         </DotField>
@@ -430,7 +454,7 @@ export function LandingPage() {
           </section>
         </DotField>
 
-        <section className="pds-section--light pds-b2b-section">
+        <section className="pds-section--light pds-b2b-section pds-b2b-section--secondary">
           <div className="pds-b2b-section__copy">
             <SectionHeader
               tone="light"
@@ -442,6 +466,7 @@ export function LandingPage() {
               <PrimaryCTA
                 href="mailto:team@z0tz.com?subject=z0tz%20B2B%20integration"
                 eventSection="b2b"
+                className="pds-b2b-secondary-cta"
               >
                 Talk to us
               </PrimaryCTA>

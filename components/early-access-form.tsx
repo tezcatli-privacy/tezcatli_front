@@ -108,18 +108,7 @@ export function EarlyAccessForm() {
 
   return (
     <form className="early-access-form" onSubmit={handleSubmit}>
-      <div className="form-grid">
-        <label>
-          Name
-          <input
-            name="name"
-            autoComplete="name"
-            required
-            value={fields.name}
-            onChange={event => updateField("name", event.target.value)}
-            onFocus={() => trackConversion("lead_form_start", { field: "name" })}
-          />
-        </label>
+      <div className="form-grid form-grid--primary">
         <label>
           WhatsApp, Telegram, or email
           <input
@@ -154,56 +143,80 @@ export function EarlyAccessForm() {
             ))}
           </select>
         </label>
-        <label>
-          What do you use today?
-          <select
-            name="currentTool"
-            value={fields.currentTool}
-            onChange={event => updateField("currentTool", event.target.value)}
-          >
-            {tools.map(item => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Initial mainnet amount
-          <select
-            name="initialAmount"
-            value={fields.initialAmount}
-            onChange={event => updateField("initialAmount", event.target.value)}
-          >
-            {initialAmounts.map(item => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-        </label>
       </div>
-      <fieldset>
-        <legend>Do you want a 15 minute guided desktop demo?</legend>
-        <div className="radio-row">
+      <details
+        className="qualification-fields"
+        onToggle={event => {
+          if (event.currentTarget.open) {
+            trackConversion("lead_form_qualification_open", {
+              source: "optional_details",
+            });
+          }
+        }}
+      >
+        <summary>Optional details that help us prioritize demos</summary>
+        <div className="form-grid">
           <label>
+            Name
             <input
-              type="radio"
-              name="wantsGuidedDemo"
-              value="Yes"
-              checked={fields.wantsGuidedDemo === "Yes"}
-              onChange={event => updateField("wantsGuidedDemo", event.target.value)}
+              name="name"
+              autoComplete="name"
+              value={fields.name}
+              onChange={event => updateField("name", event.target.value)}
+              onFocus={() => trackConversion("lead_form_start", { field: "name" })}
             />
-            Yes
           </label>
           <label>
-            <input
-              type="radio"
-              name="wantsGuidedDemo"
-              value="Not yet"
-              checked={fields.wantsGuidedDemo === "Not yet"}
-              onChange={event => updateField("wantsGuidedDemo", event.target.value)}
-            />
-            Not yet
+            What do you use today?
+            <select
+              name="currentTool"
+              value={fields.currentTool}
+              onChange={event => updateField("currentTool", event.target.value)}
+            >
+              {tools.map(item => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Initial mainnet amount
+            <select
+              name="initialAmount"
+              value={fields.initialAmount}
+              onChange={event => updateField("initialAmount", event.target.value)}
+            >
+              {initialAmounts.map(item => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
           </label>
         </div>
-      </fieldset>
+        <fieldset>
+          <legend>Do you want a 15 minute guided desktop demo?</legend>
+          <div className="radio-row">
+            <label>
+              <input
+                type="radio"
+                name="wantsGuidedDemo"
+                value="Yes"
+                checked={fields.wantsGuidedDemo === "Yes"}
+                onChange={event => updateField("wantsGuidedDemo", event.target.value)}
+              />
+              Yes
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="wantsGuidedDemo"
+                value="Not yet"
+                checked={fields.wantsGuidedDemo === "Not yet"}
+                onChange={event => updateField("wantsGuidedDemo", event.target.value)}
+              />
+              Not yet
+            </label>
+          </div>
+        </fieldset>
+      </details>
       <button className="primary-button prominent-button" type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Sending..." : "Request guided demo"}
       </button>
